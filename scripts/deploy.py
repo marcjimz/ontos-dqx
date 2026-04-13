@@ -34,8 +34,11 @@ def deploy(env_name: str, seed: bool = False):
         sql = ddl_file.read_text()
         execute_sql(client, wh, sql, catalog=catalog)
 
-    # 3. Apply seed data
+    # 3. Apply seed data (truncate first to avoid duplicates)
     if seed:
+        tables = ["members", "formulary", "claims"]
+        for t in tables:
+            execute_sql(client, wh, f"TRUNCATE TABLE {catalog}.{schema}.{t}")
         seed_dir = Path(__file__).parent.parent / "sql" / "seed"
         for seed_file in sorted(seed_dir.glob("*.sql")):
             print(f"  Seeding: {seed_file.name}")
