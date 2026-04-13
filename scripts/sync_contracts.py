@@ -32,6 +32,9 @@ def sync_contracts(env_name: str):
         with open(contract_file) as f:
             contract = yaml.safe_load(f)
 
+        # Strip fields the API auto-generates or doesn't accept
+        contract.pop("id", None)
+
         # Adjust physical names to include this environment's catalog
         for schema_obj in contract.get("schema", []):
             physical = schema_obj.get("physicalName", "")

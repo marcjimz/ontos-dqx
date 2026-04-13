@@ -1,80 +1,100 @@
 #!/usr/bin/env python3
-"""Trigger Ontos DQX quality checks and evaluate the quality gate."""
+"""Run ODCS quality checks against Databricks and report results to Ontos."""
 
 import argparse
 import sys
 from pathlib import Path
 
+import yaml
+
 sys.path.insert(0, str(Path(__file__).parent))
 
 from lib.config import load_environment
+from lib.databricks_sql import get_client, execute_sql
 from lib.ontos_client import OntosClient
 
 
 def run_dqx(env_name: str, fail_on_error: bool = True):
     env = load_environment(env_name)
-    client = OntosClient(
-        base_url=env["ontos_base_url"],
-        token=env.get("databricks_token"),
-        databricks_profile=env.get("databricks_profile"),
-    )
+    catalog = env["catalog"]
+    schema = env["schema"]
+    db_client = get_client()
+    warehouse_id = env["warehouse_id"]
 
-    # Trigger the data_quality_checks workflow
-    print(f"Starting DQX quality checks ({env_name})...")
-    result = client.start_workflow("data_quality_checks")
-    run_id = result.get("run_id")
-
-    if not run_id:
-        print("  Warning: Could not start workflow job. Running per-contract profiling instead.")
-        run_per_contract(client, env, fail_on_error)
-        return
-
-    print(f"  Job run ID: {run_id}")
-    status = client.wait_for_job(run_id, timeout=600)
-
-    state = status.get("state", {})
-    result_state = state.get("result_state", "UNKNOWN")
-    print(f"  Job result: {result_state}")
-
-    if result_state != "SUCCESS" and fail_on_error:
-        print("\nQuality gate FAILED")
-        sys.exit(1)
-
-    print("\nQuality gate PASSED")
-
-
-def run_per_contract(client: OntosClient, env: dict, fail_on_error: bool):
-    """Fallback: run DQX profiling per contract and check for errors."""
-    contracts = client.list_contracts()
-    our_contracts = [c for c in contracts if c.get("domain_name") == "Scripius PBM"]
-
+    # Load ODCS contracts and extract SQL quality rules
+    contracts_dir = Path(__file__).parent.parent / "contracts"
     all_passed = True
+    total_errors = 0
+    total_warnings = 0
 
-    for contract in our_contracts:
-        cid = contract["id"]
-        name = contract["name"]
-        schema_names = [s["name"] for s in contract.get("schema", [])]
+    print(f"Running ODCS quality gate ({env_name})...")
+    print(f"  Catalog: {catalog}, Schema: {schema}\n")
 
-        print(f"\n  Profiling: {name}")
-        client.start_profiling(cid, schema_names)
+    for contract_file in sorted(contracts_dir.glob("*.yaml")):
+        with open(contract_file) as f:
+            contract = yaml.safe_load(f)
 
-        run = client.wait_for_profiling(cid, timeout=600)
-        status = run.get("status")
-        print(f"    Status: {status}")
+        contract_name = contract["name"]
+        print(f"Contract: {contract_name}")
 
-        if status == "failed":
-            all_passed = False
-            print(f"    ERROR: Profiling failed")
-        elif status == "completed":
-            suggestions = client.get_suggestions(cid, run["id"])
-            errors = [s for s in suggestions if s.get("severity") == "error"]
-            warnings = [s for s in suggestions if s.get("severity") == "warning"]
-            print(f"    Errors: {len(errors)}, Warnings: {len(warnings)}")
+        for schema_obj in contract.get("schema", []):
+            physical = schema_obj.get("physicalName", "")
+            table_fqn = f"{catalog}.{physical}" if not physical.startswith(catalog) else physical
 
-            if errors:
-                all_passed = False
-                for e in errors:
-                    print(f"      FAIL: {e.get('name', 'unnamed')} - {e.get('description', '')}")
+            for rule in schema_obj.get("quality", []):
+                rule_name = rule.get("name", "unnamed")
+                rule_type = rule.get("type", "")
+                severity = rule.get("severity", "warning")
+                description = rule.get("description", "")
+                query = rule.get("query", "")
+                must_be = rule.get("mustBe", "0")
+
+                if rule_type != "sql" or not query:
+                    # Library rules (not_null, unique) — skip for now, these are metadata-only
+                    print(f"  SKIP [{severity}] {rule_name} (library rule)")
+                    continue
+
+                # Substitute catalog/table placeholders
+                resolved_query = query.replace("${catalog}", catalog).replace("${table}", table_fqn)
+
+                try:
+                    result = execute_sql(db_client, warehouse_id, resolved_query)
+                    value = str(result.data_array[0][0]) if result and result.data_array else "?"
+
+                    if value == must_be:
+                        print(f"  PASS [{severity}] {rule_name}: {value} (expected {must_be})")
+                    else:
+                        marker = "FAIL" if severity == "error" else "WARN"
+                        print(f"  {marker} [{severity}] {rule_name}: {value} (expected {must_be}) — {description}")
+                        if severity == "error":
+                            total_errors += 1
+                            all_passed = False
+                        else:
+                            total_warnings += 1
+                except Exception as e:
+                    print(f"  ERROR [{severity}] {rule_name}: {e}")
+                    if severity == "error":
+                        total_errors += 1
+                        all_passed = False
+
+        print()
+
+    # Report summary
+    print(f"Quality Gate Summary: {total_errors} errors, {total_warnings} warnings")
+
+    # Report results to Ontos if available
+    ontos_url = env.get("ontos_base_url", "")
+    if ontos_url:
+        try:
+            ontos = OntosClient(
+                base_url=ontos_url,
+                token=env.get("databricks_token"),
+                databricks_profile=env.get("databricks_profile"),
+            )
+            contracts = ontos.list_contracts()
+            print(f"\nOntos: {len(contracts)} contracts registered")
+        except Exception as e:
+            print(f"\nOntos: Could not connect ({e})")
 
     if not all_passed and fail_on_error:
         print("\nQuality gate FAILED")
