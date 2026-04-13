@@ -1,13 +1,13 @@
-id: "scripius-formulary-v1"
-name: "Scripius PBM Drug Formulary Contract"
+id: "pharmacy-formulary-v1"
+name: "Pharmacy PBM Drug Formulary Contract"
 version: "1.0.0"
-owner_team: "scripius-clinical"
+owner_team: "pharmacy-clinical"
 status: "draft"
 kind: "DataContract"
 apiVersion: "v3.0.2"
-domain_name: "Scripius PBM"
+domain_name: "Pharmacy PBM"
 description:
-  purpose: "Drug formulary and tier assignments for Scripius pharmacy benefit plans"
+  purpose: "Drug formulary and tier assignments for pharmacy benefit plans"
   usage: "Claims adjudication, formulary management, prior authorization decisions, cost analysis"
   limitations: "Tier assignments are plan-specific. This contract covers the base formulary."
 

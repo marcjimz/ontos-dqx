@@ -31,17 +31,17 @@
 │   Databricks Workspace   │   │     Ontos (Databricks App)   │
 │                          │   │                              │
 │  ih_genie_governance2_dev│   │  ODCS Contracts              │
-│    └── scripius.*        │◄──│    quality rules              │
+│    └── pharmacy.*        │◄──│    quality rules              │
 │  ih_genie_governance2_qa │   │    schema definitions         │
-│    └── scripius.*        │   │                              │
+│    └── pharmacy.*        │   │                              │
 │  ih_genie_governance2    │   │  DQX Quality Checks          │
-│    └── scripius.*        │   │    profiling + validation     │
+│    └── pharmacy.*        │   │    profiling + validation     │
 └──────────────────────────┘   └──────────────────────────────┘
 ```
 
-## Domain: Scripius PBM
+## Domain: Pharmacy PBM
 
-[Scripius](https://scripius.org/) is a Pharmacy Benefits Manager. This demo uses three simple tables:
+This demo uses a Pharmacy Benefits Manager (PBM) domain with three simple tables:
 
 | Table | Description | Quality Rules |
 |-------|-------------|---------------|

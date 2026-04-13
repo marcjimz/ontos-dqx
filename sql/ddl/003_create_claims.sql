@@ -1,4 +1,4 @@
--- Scripius PBM: Pharmacy claims
+-- Pharmacy PBM: Pharmacy claims
 CREATE TABLE IF NOT EXISTS ${CATALOG}.pbm.claims (
     claim_id        STRING        NOT NULL  COMMENT 'Unique claim identifier (CLM-NNNNNN)',
     member_id       STRING        NOT NULL  COMMENT 'Reference to members.member_id',
@@ -14,4 +14,4 @@ CREATE TABLE IF NOT EXISTS ${CATALOG}.pbm.claims (
     created_at      TIMESTAMP     NOT NULL  COMMENT 'Record creation timestamp (UTC)',
     updated_at      TIMESTAMP     NOT NULL  COMMENT 'Record last update timestamp (UTC)'
 ) USING DELTA
-COMMENT 'Scripius PBM pharmacy claims';
+COMMENT 'Pharmacy PBM pharmacy claims';
