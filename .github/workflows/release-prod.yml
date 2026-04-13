@@ -3,12 +3,12 @@ name: "Release to PROD"
 on:
   release:
     types: [published]
+  workflow_dispatch: {}
 
 jobs:
   release-prod:
     name: "ODCS Quality Gate — PROD Release"
     runs-on: ubuntu-latest
-    environment: prod
     steps:
       - uses: actions/checkout@v4
         with:

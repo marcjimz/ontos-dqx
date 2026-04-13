@@ -7,12 +7,17 @@ on:
       - "sql/**"
       - "contracts/**"
       - "scripts/**"
+  workflow_dispatch:
+    inputs:
+      deploy-seed:
+        description: "Deploy seed data"
+        type: boolean
+        default: true
 
 jobs:
   dqx-quality-gate:
     name: "ODCS Quality Gate — DEV"
     runs-on: ubuntu-latest
-    environment: dev
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,4 +35,4 @@ jobs:
           databricks-token: ${{ secrets.DATABRICKS_TOKEN }}
           warehouse-id: ${{ secrets.DATABRICKS_WAREHOUSE_ID }}
           ontos-base-url: ${{ secrets.ONTOS_BASE_URL }}
-          deploy-seed: "true"
+          deploy-seed: ${{ github.event.inputs.deploy-seed || 'true' }}

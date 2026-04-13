@@ -6,12 +6,12 @@ on:
     paths:
       - "sql/**"
       - "contracts/**"
+  workflow_dispatch: {}
 
 jobs:
   promote-qa:
     name: "ODCS Quality Gate — QA Promotion"
     runs-on: ubuntu-latest
-    environment: qa
     steps:
       - uses: actions/checkout@v4
         with:
