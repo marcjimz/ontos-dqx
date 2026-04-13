@@ -86,9 +86,10 @@ def run_dqx(env_name: str, fail_on_error: bool = True):
     ontos_url = env.get("ontos_base_url", "")
     if ontos_url:
         try:
+            ontos_token = env.get("ontos_oauth_token") or env.get("databricks_token")
             ontos = OntosClient(
                 base_url=ontos_url,
-                token=env.get("databricks_token"),
+                token=ontos_token,
                 databricks_profile=env.get("databricks_profile"),
             )
             contracts = ontos.list_contracts()

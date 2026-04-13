@@ -32,5 +32,6 @@ def load_environment(env_name: str) -> Dict[str, Any]:
     env["warehouse_id"] = os.environ.get("DATABRICKS_WAREHOUSE_ID", "")
     env["ontos_base_url"] = os.environ.get("ONTOS_BASE_URL", "")
     env["databricks_profile"] = os.environ.get("DATABRICKS_PROFILE")
+    env["ontos_oauth_token"] = os.environ.get("ONTOS_OAUTH_TOKEN", "")
 
     return env

@@ -26,3 +26,5 @@ jobs:
           databricks-token: ${{ secrets.DATABRICKS_TOKEN }}
           warehouse-id: ${{ secrets.DATABRICKS_WAREHOUSE_ID }}
           ontos-base-url: ${{ secrets.ONTOS_BASE_URL }}
+          sp-client-id: ${{ secrets.SP_CLIENT_ID }}
+          sp-client-secret: ${{ secrets.SP_CLIENT_SECRET }}

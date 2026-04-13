@@ -18,9 +18,11 @@ def sync_contracts(env_name: str):
     catalog = env["catalog"]
     target_status = env["contract_status"]
 
+    # Prefer OAuth token (from SP client_credentials) for Databricks Apps auth
+    ontos_token = env.get("ontos_oauth_token") or env.get("databricks_token")
     client = OntosClient(
         base_url=env["ontos_base_url"],
-        token=env.get("databricks_token"),
+        token=ontos_token,
         databricks_profile=env.get("databricks_profile"),
     )
 

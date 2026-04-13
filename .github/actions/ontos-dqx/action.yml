@@ -17,6 +17,14 @@ inputs:
   ontos-base-url:
     description: "Ontos application base URL"
     required: true
+  sp-client-id:
+    description: "Service Principal client ID for OAuth token exchange"
+    required: false
+    default: ""
+  sp-client-secret:
+    description: "Service Principal client secret for OAuth token exchange"
+    required: false
+    default: ""
   deploy-seed:
     description: "Whether to deploy seed data (true/false)"
     required: false
@@ -73,6 +81,29 @@ runs:
         if [ "${{ inputs.deploy-seed }}" = "true" ]; then SEED_FLAG="--seed"; fi
         python scripts/deploy.py --env ${{ inputs.environment }} $SEED_FLAG
 
+    - name: Obtain OAuth token for Ontos API
+      id: oauth-token
+      if: inputs.ontos-base-url != '' && inputs.sp-client-id != '' && inputs.sp-client-secret != ''
+      shell: bash
+      env:
+        DATABRICKS_HOST: ${{ inputs.databricks-host }}
+        SP_CLIENT_ID: ${{ inputs.sp-client-id }}
+        SP_CLIENT_SECRET: ${{ inputs.sp-client-secret }}
+      run: |
+        OAUTH_RESPONSE=$(curl -s -X POST "${DATABRICKS_HOST}/oidc/v1/token" \
+          -H "Content-Type: application/x-www-form-urlencoded" \
+          -d "grant_type=client_credentials&client_id=${SP_CLIENT_ID}&client_secret=${SP_CLIENT_SECRET}&scope=all-apis")
+        OAUTH_TOKEN=$(echo "$OAUTH_RESPONSE" | python3 -c "import json,sys; print(json.load(sys.stdin)['access_token'])" 2>/dev/null)
+        if [ -n "$OAUTH_TOKEN" ]; then
+          echo "OAuth token obtained successfully"
+          echo "::add-mask::${OAUTH_TOKEN}"
+          echo "token=${OAUTH_TOKEN}" >> $GITHUB_OUTPUT
+        else
+          echo "Failed to obtain OAuth token"
+          echo "$OAUTH_RESPONSE"
+          exit 1
+        fi
+
     - name: Sync ODCS contracts to Ontos
       shell: bash
       env:
@@ -80,9 +111,12 @@ runs:
         DATABRICKS_TOKEN: ${{ inputs.databricks-token }}
         DATABRICKS_WAREHOUSE_ID: ${{ inputs.warehouse-id }}
         ONTOS_BASE_URL: ${{ inputs.ontos-base-url }}
+        ONTOS_OAUTH_TOKEN: ${{ steps.oauth-token.outputs.token }}
       run: |
-        if [ -n "${{ inputs.ontos-base-url }}" ]; then
+        if [ -n "$ONTOS_OAUTH_TOKEN" ]; then
           python scripts/sync_contracts.py --env ${{ inputs.environment }}
+        elif [ -n "${{ inputs.ontos-base-url }}" ]; then
+          echo "Skipping contract sync (no OAuth credentials for Ontos API)"
         else
           echo "Skipping contract sync (ONTOS_BASE_URL not configured)"
         fi
@@ -94,30 +128,9 @@ runs:
         DATABRICKS_TOKEN: ${{ inputs.databricks-token }}
         DATABRICKS_WAREHOUSE_ID: ${{ inputs.warehouse-id }}
         ONTOS_BASE_URL: ${{ inputs.ontos-base-url }}
+        ONTOS_OAUTH_TOKEN: ${{ steps.oauth-token.outputs.token }}
       run: |
-        if [ -n "${{ inputs.ontos-base-url }}" ]; then
-          python scripts/run_dqx.py --env ${{ inputs.environment }}
-        else
-          echo "Skipping DQX gate (ONTOS_BASE_URL not configured)"
-          echo "Verifying data deployment via SQL instead..."
-          python3 -c "
-        import os, sys
-        sys.path.insert(0, 'scripts')
-        from lib.config import load_environment
-        from lib.databricks_sql import get_client, execute_sql
-        env = load_environment('${{ inputs.environment }}')
-        client = get_client()
-        wh = env['warehouse_id']
-        catalog = env['catalog']
-        schema = env['schema']
-        tables = ['members', 'formulary', 'claims']
-        for t in tables:
-            result = execute_sql(client, wh, f'SELECT COUNT(*) FROM {catalog}.{schema}.{t}')
-            count = result.data_array[0][0] if result and result.data_array else '?'
-            print(f'  {catalog}.{schema}.{t}: {count} rows')
-        print('Deployment verified successfully')
-          "
-        fi
+        python scripts/run_dqx.py --env ${{ inputs.environment }}
 
     - name: Cleanup runner IP from Databricks
       if: always()
