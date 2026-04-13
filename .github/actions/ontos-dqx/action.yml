@@ -78,6 +78,7 @@ runs:
       env:
         DATABRICKS_HOST: ${{ inputs.databricks-host }}
         DATABRICKS_TOKEN: ${{ inputs.databricks-token }}
+        DATABRICKS_WAREHOUSE_ID: ${{ inputs.warehouse-id }}
         ONTOS_BASE_URL: ${{ inputs.ontos-base-url }}
       run: |
         if [ -n "${{ inputs.ontos-base-url }}" ]; then
@@ -91,6 +92,7 @@ runs:
       env:
         DATABRICKS_HOST: ${{ inputs.databricks-host }}
         DATABRICKS_TOKEN: ${{ inputs.databricks-token }}
+        DATABRICKS_WAREHOUSE_ID: ${{ inputs.warehouse-id }}
         ONTOS_BASE_URL: ${{ inputs.ontos-base-url }}
       run: |
         if [ -n "${{ inputs.ontos-base-url }}" ]; then
