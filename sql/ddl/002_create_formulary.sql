@@ -1,5 +1,5 @@
 -- Scripius PBM: Drug formulary tier list
-CREATE TABLE IF NOT EXISTS ${CATALOG}.scripius.formulary (
+CREATE TABLE IF NOT EXISTS ${CATALOG}.pbm.formulary (
     ndc_code            STRING    NOT NULL  COMMENT 'National Drug Code (11-digit)',
     drug_name           STRING    NOT NULL  COMMENT 'Brand drug name',
     generic_name        STRING    NOT NULL  COMMENT 'Generic drug name',

@@ -1,15 +1,15 @@
 environments:
   dev:
-    catalog: "ih_genie_governance2_dev"
-    schema: "scripius"
+    catalog: "scripius_dev"
+    schema: "pbm"
     contract_status: "draft"
 
   qa:
-    catalog: "ih_genie_governance2_qa"
-    schema: "scripius"
+    catalog: "scripius_qa"
+    schema: "pbm"
     contract_status: "proposed"
 
   prod:
-    catalog: "ih_genie_governance2"
-    schema: "scripius"
+    catalog: "scripius_prod"
+    schema: "pbm"
     contract_status: "active"

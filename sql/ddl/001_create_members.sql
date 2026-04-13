@@ -1,5 +1,5 @@
 -- Scripius PBM: Member enrollment master data
-CREATE TABLE IF NOT EXISTS ${CATALOG}.scripius.members (
+CREATE TABLE IF NOT EXISTS ${CATALOG}.pbm.members (
     member_id       STRING    NOT NULL  COMMENT 'Unique member identifier (MBR-NNNNNN)',
     plan_id         STRING    NOT NULL  COMMENT 'Benefit plan identifier',
     group_id        STRING    NOT NULL  COMMENT 'Employer group identifier',

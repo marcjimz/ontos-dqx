@@ -1,6 +1,6 @@
 -- Scripius PBM: Seed claims data (20 rows)
 -- NOTE: Rows marked with DEFECT intentionally violate quality rules to demonstrate DQX
-INSERT INTO ${CATALOG}.scripius.claims VALUES
+INSERT INTO ${CATALOG}.pbm.claims VALUES
 -- Clean claims
 ('CLM-200001', 'MBR-100001', '00071015523', '1234567890', '2025-03-01', 30, 30.00, 12.50, 2.00, 10.00, 'paid', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),
 ('CLM-200002', 'MBR-100002', '00378180510', '1234567890', '2025-03-02', 90, 90.00, 8.75, 1.50, 5.00, 'paid', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),

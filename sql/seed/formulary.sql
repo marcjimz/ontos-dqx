@@ -1,5 +1,5 @@
 -- Scripius PBM: Seed formulary data (10 rows, all clean)
-INSERT INTO ${CATALOG}.scripius.formulary VALUES
+INSERT INTO ${CATALOG}.pbm.formulary VALUES
 ('00071015523', 'Lipitor', 'Atorvastatin', 'Statins', 1, false, 90, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),
 ('00002322330', 'Humalog', 'Insulin Lispro', 'Insulins', 2, false, NULL, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),
 ('59762384001', 'Eliquis', 'Apixaban', 'Anticoagulants', 2, false, 60, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),

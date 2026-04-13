@@ -13,7 +13,7 @@ description:
 
 schema:
   - name: claims
-    physicalName: "scripius.claims"
+    physicalName: "pbm.claims"
     description: "Pharmacy claims with cost and dispensing details"
     properties:
       - name: claim_id
@@ -97,7 +97,7 @@ schema:
         severity: "error"
         businessImpact: "operational"
         description: "member_id must reference an existing member"
-        query: "SELECT COUNT(*) FROM ${table} c LEFT JOIN ${catalog}.scripius.members m ON c.member_id = m.member_id WHERE m.member_id IS NULL"
+        query: "SELECT COUNT(*) FROM ${table} c LEFT JOIN ${catalog}.pbm.members m ON c.member_id = m.member_id WHERE m.member_id IS NULL"
         mustBe: "0"
 
       - name: "ndc_code_referential_integrity"
@@ -106,7 +106,7 @@ schema:
         severity: "warning"
         businessImpact: "operational"
         description: "ndc_code should reference a formulary drug"
-        query: "SELECT COUNT(*) FROM ${table} c LEFT JOIN ${catalog}.scripius.formulary f ON c.ndc_code = f.ndc_code WHERE f.ndc_code IS NULL"
+        query: "SELECT COUNT(*) FROM ${table} c LEFT JOIN ${catalog}.pbm.formulary f ON c.ndc_code = f.ndc_code WHERE f.ndc_code IS NULL"
         mustBe: "0"
 
       - name: "ingredient_cost_non_negative"

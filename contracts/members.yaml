@@ -13,7 +13,7 @@ description:
 
 schema:
   - name: members
-    physicalName: "scripius.members"
+    physicalName: "pbm.members"
     description: "PBM member enrollment records"
     properties:
       - name: member_id

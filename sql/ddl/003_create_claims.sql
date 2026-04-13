@@ -1,5 +1,5 @@
 -- Scripius PBM: Pharmacy claims
-CREATE TABLE IF NOT EXISTS ${CATALOG}.scripius.claims (
+CREATE TABLE IF NOT EXISTS ${CATALOG}.pbm.claims (
     claim_id        STRING        NOT NULL  COMMENT 'Unique claim identifier (CLM-NNNNNN)',
     member_id       STRING        NOT NULL  COMMENT 'Reference to members.member_id',
     ndc_code        STRING        NOT NULL  COMMENT 'National Drug Code dispensed',

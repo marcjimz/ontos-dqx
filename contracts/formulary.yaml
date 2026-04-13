@@ -13,7 +13,7 @@ description:
 
 schema:
   - name: formulary
-    physicalName: "scripius.formulary"
+    physicalName: "pbm.formulary"
     description: "Drug formulary with tier and prior auth requirements"
     properties:
       - name: ndc_code
