@@ -25,7 +25,12 @@ def sync_contracts(env_name: str):
     )
 
     # Get existing contracts to decide create vs update
-    existing = {c["name"]: c for c in client.list_contracts()}
+    try:
+        existing = {c["name"]: c for c in client.list_contracts()}
+    except Exception as e:
+        print(f"  Warning: Could not connect to Ontos API ({e})")
+        print(f"  Contracts will be synced when Ontos is accessible with OAuth token")
+        return
 
     contracts_dir = Path(__file__).parent.parent / "contracts"
     for contract_file in sorted(contracts_dir.glob("*.yaml")):
