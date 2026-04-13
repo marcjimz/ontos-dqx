@@ -1,0 +1,57 @@
+name: "Ontos DQX Quality Gate"
+description: "Deploy DDL, sync ODCS contracts, and run DQX quality checks against a target environment"
+
+inputs:
+  environment:
+    description: "Target environment (dev, qa, prod)"
+    required: true
+  databricks-host:
+    description: "Databricks workspace URL"
+    required: true
+  databricks-token:
+    description: "Databricks PAT or Service Principal token"
+    required: true
+  warehouse-id:
+    description: "SQL Warehouse ID for query execution"
+    required: true
+  ontos-base-url:
+    description: "Ontos application base URL"
+    required: true
+  deploy-seed:
+    description: "Whether to deploy seed data (true/false)"
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install Python dependencies
+      shell: bash
+      run: pip install -r requirements.txt
+
+    - name: Deploy DDL to Databricks
+      shell: bash
+      env:
+        DATABRICKS_HOST: ${{ inputs.databricks-host }}
+        DATABRICKS_TOKEN: ${{ inputs.databricks-token }}
+        DATABRICKS_WAREHOUSE_ID: ${{ inputs.warehouse-id }}
+      run: |
+        SEED_FLAG=""
+        if [ "${{ inputs.deploy-seed }}" = "true" ]; then SEED_FLAG="--seed"; fi
+        python scripts/deploy.py --env ${{ inputs.environment }} $SEED_FLAG
+
+    - name: Sync ODCS contracts to Ontos
+      shell: bash
+      env:
+        DATABRICKS_HOST: ${{ inputs.databricks-host }}
+        DATABRICKS_TOKEN: ${{ inputs.databricks-token }}
+        ONTOS_BASE_URL: ${{ inputs.ontos-base-url }}
+      run: python scripts/sync_contracts.py --env ${{ inputs.environment }}
+
+    - name: Run DQX quality gate
+      shell: bash
+      env:
+        DATABRICKS_HOST: ${{ inputs.databricks-host }}
+        DATABRICKS_TOKEN: ${{ inputs.databricks-token }}
+        ONTOS_BASE_URL: ${{ inputs.ontos-base-url }}
+      run: python scripts/run_dqx.py --env ${{ inputs.environment }}

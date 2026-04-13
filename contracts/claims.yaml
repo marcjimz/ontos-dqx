@@ -1,0 +1,155 @@
+id: "scripius-claims-v1"
+name: "Scripius PBM Pharmacy Claims Contract"
+version: "1.0.0"
+owner_team: "scripius-data-engineering"
+status: "draft"
+kind: "DataContract"
+apiVersion: "v3.0.2"
+domain_name: "Scripius PBM"
+description:
+  purpose: "Pharmacy claims data for Scripius PBM including dispensing details and costs"
+  usage: "Claims processing, cost reporting, utilization analytics, regulatory filings"
+  limitations: "Contains PHI. Financial amounts are in USD. Reversed claims retain original amounts."
+
+schema:
+  - name: claims
+    physicalName: "scripius.claims"
+    description: "Pharmacy claims with cost and dispensing details"
+    properties:
+      - name: claim_id
+        logicalType: string
+        required: true
+        unique: true
+        description: "Unique claim identifier (CLM-NNNNNN format)"
+
+      - name: member_id
+        logicalType: string
+        required: true
+        description: "Reference to members.member_id"
+
+      - name: ndc_code
+        logicalType: string
+        required: true
+        description: "National Drug Code dispensed"
+
+      - name: pharmacy_npi
+        logicalType: string
+        required: true
+        description: "Dispensing pharmacy NPI (10-digit)"
+
+      - name: fill_date
+        logicalType: date
+        required: true
+        description: "Date prescription was filled"
+
+      - name: days_supply
+        logicalType: integer
+        required: true
+        description: "Days supply dispensed"
+
+      - name: quantity
+        logicalType: decimal
+        required: true
+        description: "Quantity dispensed"
+
+      - name: ingredient_cost
+        logicalType: decimal
+        required: true
+        description: "Drug ingredient cost (USD)"
+
+      - name: dispensing_fee
+        logicalType: decimal
+        required: true
+        description: "Pharmacy dispensing fee (USD)"
+
+      - name: copay
+        logicalType: decimal
+        required: true
+        description: "Member copay amount (USD)"
+
+      - name: claim_status
+        logicalType: string
+        required: true
+        description: "Status: paid, reversed, rejected, pending"
+
+      - name: created_at
+        logicalType: timestamp
+        required: true
+        description: "Record creation timestamp (UTC)"
+
+      - name: updated_at
+        logicalType: timestamp
+        required: true
+        description: "Record last update timestamp (UTC)"
+
+    quality:
+      - name: "claim_id_unique"
+        dimension: "uniqueness"
+        type: "library"
+        severity: "error"
+        businessImpact: "operational"
+        description: "claim_id must be unique"
+        rule: "is_unique"
+
+      - name: "member_id_referential_integrity"
+        dimension: "consistency"
+        type: "sql"
+        severity: "error"
+        businessImpact: "operational"
+        description: "member_id must reference an existing member"
+        query: "SELECT COUNT(*) FROM ${table} c LEFT JOIN ${catalog}.scripius.members m ON c.member_id = m.member_id WHERE m.member_id IS NULL"
+        mustBe: "0"
+
+      - name: "ndc_code_referential_integrity"
+        dimension: "consistency"
+        type: "sql"
+        severity: "warning"
+        businessImpact: "operational"
+        description: "ndc_code should reference a formulary drug"
+        query: "SELECT COUNT(*) FROM ${table} c LEFT JOIN ${catalog}.scripius.formulary f ON c.ndc_code = f.ndc_code WHERE f.ndc_code IS NULL"
+        mustBe: "0"
+
+      - name: "ingredient_cost_non_negative"
+        dimension: "accuracy"
+        type: "sql"
+        severity: "error"
+        businessImpact: "operational"
+        description: "ingredient_cost must be non-negative"
+        query: "SELECT COUNT(*) FROM ${table} WHERE ingredient_cost < 0"
+        mustBe: "0"
+
+      - name: "fill_date_not_future"
+        dimension: "timeliness"
+        type: "sql"
+        severity: "warning"
+        businessImpact: "operational"
+        description: "fill_date should not be in the future"
+        query: "SELECT COUNT(*) FROM ${table} WHERE fill_date > CURRENT_DATE()"
+        mustBe: "0"
+
+      - name: "claim_status_valid"
+        dimension: "conformity"
+        type: "sql"
+        severity: "error"
+        businessImpact: "regulatory"
+        description: "claim_status must be one of: paid, reversed, rejected, pending"
+        query: "SELECT COUNT(*) FROM ${table} WHERE claim_status NOT IN ('paid', 'reversed', 'rejected', 'pending')"
+        mustBe: "0"
+
+      - name: "pharmacy_npi_format"
+        dimension: "conformity"
+        type: "sql"
+        severity: "warning"
+        businessImpact: "regulatory"
+        description: "pharmacy_npi must be exactly 10 digits"
+        query: "SELECT COUNT(*) FROM ${table} WHERE LENGTH(pharmacy_npi) != 10 OR pharmacy_npi NOT RLIKE '^[0-9]{10}$'"
+        mustBe: "0"
+
+      - name: "days_supply_positive"
+        dimension: "accuracy"
+        type: "sql"
+        severity: "error"
+        businessImpact: "operational"
+        description: "days_supply must be at least 1"
+        query: "SELECT COUNT(*) FROM ${table} WHERE days_supply < 1"
+        mustBe: "0"

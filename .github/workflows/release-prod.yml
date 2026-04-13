@@ -1,0 +1,28 @@
+name: "Release to PROD"
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release-prod:
+    name: "ODCS Quality Gate — PROD Release"
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Release to PROD
+        uses: ./.github/actions/ontos-dqx
+        with:
+          environment: prod
+          databricks-host: ${{ secrets.DATABRICKS_HOST }}
+          databricks-token: ${{ secrets.DATABRICKS_TOKEN }}
+          warehouse-id: ${{ secrets.DATABRICKS_WAREHOUSE_ID }}
+          ontos-base-url: ${{ secrets.ONTOS_BASE_URL }}

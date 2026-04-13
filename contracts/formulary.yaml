@@ -1,0 +1,107 @@
+id: "scripius-formulary-v1"
+name: "Scripius PBM Drug Formulary Contract"
+version: "1.0.0"
+owner_team: "scripius-clinical"
+status: "draft"
+kind: "DataContract"
+apiVersion: "v3.0.2"
+domain_name: "Scripius PBM"
+description:
+  purpose: "Drug formulary and tier assignments for Scripius pharmacy benefit plans"
+  usage: "Claims adjudication, formulary management, prior authorization decisions, cost analysis"
+  limitations: "Tier assignments are plan-specific. This contract covers the base formulary."
+
+schema:
+  - name: formulary
+    physicalName: "scripius.formulary"
+    description: "Drug formulary with tier and prior auth requirements"
+    properties:
+      - name: ndc_code
+        logicalType: string
+        required: true
+        unique: true
+        description: "National Drug Code (11-digit)"
+
+      - name: drug_name
+        logicalType: string
+        required: true
+        description: "Brand drug name"
+
+      - name: generic_name
+        logicalType: string
+        required: true
+        description: "Generic drug name"
+
+      - name: therapeutic_class
+        logicalType: string
+        required: true
+        description: "Therapeutic classification"
+
+      - name: tier
+        logicalType: integer
+        required: true
+        description: "Formulary tier (1=generic, 2=preferred brand, 3=non-preferred, 4=specialty)"
+
+      - name: requires_prior_auth
+        logicalType: boolean
+        required: true
+        description: "Whether prior authorization is required"
+
+      - name: quantity_limit
+        logicalType: integer
+        required: false
+        description: "Maximum quantity per fill (NULL if no limit)"
+
+      - name: created_at
+        logicalType: timestamp
+        required: true
+        description: "Record creation timestamp (UTC)"
+
+      - name: updated_at
+        logicalType: timestamp
+        required: true
+        description: "Record last update timestamp (UTC)"
+
+    quality:
+      - name: "ndc_code_not_null"
+        dimension: "completeness"
+        type: "library"
+        severity: "error"
+        businessImpact: "operational"
+        description: "ndc_code must not be null"
+        rule: "is_not_null"
+
+      - name: "ndc_code_unique"
+        dimension: "uniqueness"
+        type: "library"
+        severity: "error"
+        businessImpact: "operational"
+        description: "ndc_code must be unique"
+        rule: "is_unique"
+
+      - name: "ndc_code_length"
+        dimension: "conformity"
+        type: "sql"
+        severity: "error"
+        businessImpact: "regulatory"
+        description: "ndc_code must be exactly 11 digits"
+        query: "SELECT COUNT(*) FROM ${table} WHERE LENGTH(ndc_code) != 11 OR ndc_code NOT RLIKE '^[0-9]{11}$'"
+        mustBe: "0"
+
+      - name: "tier_valid_range"
+        dimension: "accuracy"
+        type: "sql"
+        severity: "error"
+        businessImpact: "operational"
+        description: "tier must be between 1 and 4"
+        query: "SELECT COUNT(*) FROM ${table} WHERE tier < 1 OR tier > 4"
+        mustBe: "0"
+
+      - name: "quantity_limit_positive"
+        dimension: "accuracy"
+        type: "sql"
+        severity: "warning"
+        businessImpact: "operational"
+        description: "quantity_limit must be positive when present"
+        query: "SELECT COUNT(*) FROM ${table} WHERE quantity_limit IS NOT NULL AND quantity_limit <= 0"
+        mustBe: "0"

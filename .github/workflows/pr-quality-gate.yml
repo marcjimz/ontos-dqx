@@ -1,0 +1,33 @@
+name: "PR Quality Gate (DEV)"
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "sql/**"
+      - "contracts/**"
+      - "scripts/**"
+
+jobs:
+  dqx-quality-gate:
+    name: "ODCS Quality Gate — DEV"
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run Ontos DQX quality gate
+        uses: ./.github/actions/ontos-dqx
+        with:
+          environment: dev
+          databricks-host: ${{ secrets.DATABRICKS_HOST }}
+          databricks-token: ${{ secrets.DATABRICKS_TOKEN }}
+          warehouse-id: ${{ secrets.DATABRICKS_WAREHOUSE_ID }}
+          ontos-base-url: ${{ secrets.ONTOS_BASE_URL }}
+          deploy-seed: "true"

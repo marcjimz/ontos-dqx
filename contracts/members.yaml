@@ -1,0 +1,117 @@
+id: "scripius-members-v1"
+name: "Scripius PBM Member Enrollment Contract"
+version: "1.0.0"
+owner_team: "scripius-data-engineering"
+status: "draft"
+kind: "DataContract"
+apiVersion: "v3.0.2"
+domain_name: "Scripius PBM"
+description:
+  purpose: "Member enrollment master data for Scripius pharmacy benefit management"
+  usage: "Eligibility verification, claims adjudication, member analytics, and plan reporting"
+  limitations: "Contains PHI. HIPAA compliance required. PII must be masked in non-production environments."
+
+schema:
+  - name: members
+    physicalName: "scripius.members"
+    description: "PBM member enrollment records"
+    properties:
+      - name: member_id
+        logicalType: string
+        required: true
+        unique: true
+        description: "Unique member identifier (MBR-NNNNNN format)"
+
+      - name: plan_id
+        logicalType: string
+        required: true
+        description: "Benefit plan identifier"
+
+      - name: group_id
+        logicalType: string
+        required: true
+        description: "Employer group identifier"
+
+      - name: first_name
+        logicalType: string
+        required: true
+        description: "Member first name"
+
+      - name: last_name
+        logicalType: string
+        required: true
+        description: "Member last name"
+
+      - name: date_of_birth
+        logicalType: date
+        required: true
+        description: "Member date of birth"
+
+      - name: gender
+        logicalType: string
+        required: true
+        description: "Gender code: M, F, X, U"
+
+      - name: eligibility_start
+        logicalType: date
+        required: true
+        description: "Benefit eligibility start date"
+
+      - name: eligibility_end
+        logicalType: date
+        required: false
+        description: "Benefit eligibility end date (NULL if active)"
+
+      - name: created_at
+        logicalType: timestamp
+        required: true
+        description: "Record creation timestamp (UTC)"
+
+      - name: updated_at
+        logicalType: timestamp
+        required: true
+        description: "Record last update timestamp (UTC)"
+
+    quality:
+      - name: "member_id_not_null"
+        dimension: "completeness"
+        type: "library"
+        severity: "error"
+        businessImpact: "operational"
+        description: "member_id must not be null"
+        rule: "is_not_null"
+
+      - name: "member_id_unique"
+        dimension: "uniqueness"
+        type: "library"
+        severity: "error"
+        businessImpact: "operational"
+        description: "member_id must be unique across all rows"
+        rule: "is_unique"
+
+      - name: "member_id_format"
+        dimension: "conformity"
+        type: "sql"
+        severity: "warning"
+        businessImpact: "operational"
+        description: "member_id should follow MBR-NNNNNN format"
+        query: "SELECT COUNT(*) FROM ${table} WHERE member_id NOT RLIKE '^MBR-[0-9]{6}$'"
+        mustBe: "0"
+
+      - name: "gender_valid_values"
+        dimension: "conformity"
+        type: "sql"
+        severity: "error"
+        businessImpact: "regulatory"
+        description: "gender must be M, F, X, or U"
+        query: "SELECT COUNT(*) FROM ${table} WHERE gender NOT IN ('M', 'F', 'X', 'U')"
+        mustBe: "0"
+
+      - name: "eligibility_date_order"
+        dimension: "accuracy"
+        type: "sql"
+        severity: "error"
+        businessImpact: "operational"
+        description: "eligibility_end must be after eligibility_start when present"
+        query: "SELECT COUNT(*) FROM ${table} WHERE eligibility_end IS NOT NULL AND eligibility_end < eligibility_start"
+        mustBe: "0"
