@@ -1,13 +1,13 @@
-id: "scripius-members-v1"
-name: "Scripius PBM Member Enrollment Contract"
+id: "pharmacy-members-v1"
+name: "Pharmacy PBM Member Enrollment Contract"
 version: "1.0.0"
-owner_team: "scripius-data-engineering"
+owner_team: "pharmacy-data-engineering"
 status: "draft"
 kind: "DataContract"
 apiVersion: "v3.0.2"
-domain_name: "Scripius PBM"
+domain_name: "Pharmacy PBM"
 description:
-  purpose: "Member enrollment master data for Scripius pharmacy benefit management"
+  purpose: "Member enrollment master data for pharmacy benefit management"
   usage: "Eligibility verification, claims adjudication, member analytics, and plan reporting"
   limitations: "Contains PHI. HIPAA compliance required. PII must be masked in non-production environments."
 

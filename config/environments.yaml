@@ -1,15 +1,15 @@
 environments:
   dev:
-    catalog: "scripius_dev"
+    catalog: "pharmacy_dev"
     schema: "pbm"
     contract_status: "draft"
 
   qa:
-    catalog: "scripius_qa"
+    catalog: "pharmacy_qa"
     schema: "pbm"
     contract_status: "proposed"
 
   prod:
-    catalog: "scripius_prod"
+    catalog: "pharmacy_prod"
     schema: "pbm"
     contract_status: "active"

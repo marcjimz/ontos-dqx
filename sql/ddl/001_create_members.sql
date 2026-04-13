@@ -1,4 +1,4 @@
--- Scripius PBM: Member enrollment master data
+-- Pharmacy PBM: Member enrollment master data
 CREATE TABLE IF NOT EXISTS ${CATALOG}.pbm.members (
     member_id       STRING    NOT NULL  COMMENT 'Unique member identifier (MBR-NNNNNN)',
     plan_id         STRING    NOT NULL  COMMENT 'Benefit plan identifier',
@@ -12,4 +12,4 @@ CREATE TABLE IF NOT EXISTS ${CATALOG}.pbm.members (
     created_at      TIMESTAMP NOT NULL  COMMENT 'Record creation timestamp (UTC)',
     updated_at      TIMESTAMP NOT NULL  COMMENT 'Record last update timestamp (UTC)'
 ) USING DELTA
-COMMENT 'Scripius PBM member enrollment records';
+COMMENT 'Pharmacy PBM member enrollment records';

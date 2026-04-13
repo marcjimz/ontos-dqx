@@ -1,4 +1,4 @@
--- Scripius PBM: Seed claims data (22 rows)
+-- Pharmacy PBM: Seed claims data (22 rows)
 -- Includes new Q2 claims batch from upstream pharmacy system
 INSERT INTO ${CATALOG}.pbm.claims VALUES
 ('CLM-200001', 'MBR-100001', '00071015523', '1234567890', '2025-03-01', 30, 30.00, 12.50, 2.00, 10.00, 'paid', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),

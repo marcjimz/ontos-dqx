@@ -1,4 +1,4 @@
--- Scripius PBM: Seed member data (15 rows, all clean)
+-- Pharmacy PBM: Seed member data (15 rows, all clean)
 INSERT INTO ${CATALOG}.pbm.members VALUES
 ('MBR-100001', 'PLN-GOLD-2025', 'GRP-ACME', 'Alice', 'Johnson', '1985-03-15', 'F', '2025-01-01', NULL, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),
 ('MBR-100002', 'PLN-GOLD-2025', 'GRP-ACME', 'Bob', 'Smith', '1978-07-22', 'M', '2025-01-01', NULL, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),

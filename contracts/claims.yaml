@@ -1,13 +1,13 @@
-id: "scripius-claims-v1"
-name: "Scripius PBM Pharmacy Claims Contract"
+id: "pharmacy-claims-v1"
+name: "Pharmacy PBM Claims Contract"
 version: "1.0.0"
-owner_team: "scripius-data-engineering"
+owner_team: "pharmacy-data-engineering"
 status: "draft"
 kind: "DataContract"
 apiVersion: "v3.0.2"
-domain_name: "Scripius PBM"
+domain_name: "Pharmacy PBM"
 description:
-  purpose: "Pharmacy claims data for Scripius PBM including dispensing details and costs"
+  purpose: "Pharmacy claims data including dispensing details and costs"
   usage: "Claims processing, cost reporting, utilization analytics, regulatory filings"
   limitations: "Contains PHI. Financial amounts are in USD. Reversed claims retain original amounts."
 

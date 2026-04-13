@@ -6,7 +6,7 @@ ifneq (,$(wildcard .env))
 endif
 
 help: ## Show this help
-	@echo "ontos-dqx: ODCS-Driven Data Quality with Ontos (Scripius PBM Demo)"
+	@echo "ontos-dqx: ODCS-Driven Data Quality with Ontos (Pharmacy PBM Demo)"
 	@echo ""
 	@echo "=== Setup ==="
 	@echo "  make setup              Create .env from template"

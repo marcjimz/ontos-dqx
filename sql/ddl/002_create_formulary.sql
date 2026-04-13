@@ -1,4 +1,4 @@
--- Scripius PBM: Drug formulary tier list
+-- Pharmacy PBM: Drug formulary tier list
 CREATE TABLE IF NOT EXISTS ${CATALOG}.pbm.formulary (
     ndc_code            STRING    NOT NULL  COMMENT 'National Drug Code (11-digit)',
     drug_name           STRING    NOT NULL  COMMENT 'Brand drug name',
@@ -10,4 +10,4 @@ CREATE TABLE IF NOT EXISTS ${CATALOG}.pbm.formulary (
     created_at          TIMESTAMP NOT NULL  COMMENT 'Record creation timestamp (UTC)',
     updated_at          TIMESTAMP NOT NULL  COMMENT 'Record last update timestamp (UTC)'
 ) USING DELTA
-COMMENT 'Scripius PBM drug formulary and tier assignments';
+COMMENT 'Pharmacy PBM drug formulary and tier assignments';
